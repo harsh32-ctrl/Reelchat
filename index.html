@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#000000">
+<title>ReelChat</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#000;
+  color:#fff;
+  font-family:Arial,sans-serif;
+  overflow:hidden;
+}
+.app{
+  height:100vh;
+  max-width:500px;
+  margin:auto;
+  background:#111;
+  position:relative;
+}
+header{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  z-index:10;
+  padding:18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:linear-gradient(#000aa,#0000);
+}
+.logo{font-size:24px;font-weight:bold}
+.upload{
+  background:#fff;
+  color:#000;
+  border:0;
+  padding:8px 14px;
+  border-radius:20px;
+  font-weight:bold;
+}
+.reels{
+  height:100vh;
+  overflow-y:auto;
+  scroll-snap-type:y mandatory;
+}
+.reel{
+  height:100vh;
+  scroll-snap-align:start;
+  position:relative;
+  background:#222;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.reel video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.info{
+  position:absolute;
+  left:15px;
+  bottom:80px;
+  right:80px;
+  text-shadow:0 1px 5px #000;
+}
+.info h3{margin-bottom:8px}
+.info p{font-size:14px}
+.actions{
+  position:absolute;
+  right:12px;
+  bottom:85px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  text-align:center;
+}
+.action{
+  border:0;
+  background:#0008;
+  color:#fff;
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  font-size:22px;
+}
+.count{font-size:12px}
+.bottom{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  height:58px;
+  background:#000e;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  z-index:20;
+}
+.bottom button{
+  background:none;
+  border:0;
+  color:#fff;
+  font-size:13px;
+}
+.empty{
+  padding:30px;
+  text-align:center;
+  color:#aaa;
+}
+#file{display:none}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+  <div class="logo">ReelChat</div>
+  <label class="upload">
+    + Reel
+    <input id="file" type="file" accept="video/*">
+  </label>
+</header>
+
+<div class="reels" id="reels">
+
+  <section class="reel">
+    <video
+      src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+      loop
+      muted
+      playsinline
+      autoplay>
+    </video>
+
+    <div class="info">
+      <h3>@reelchat_user</h3>
+      <p>Welcome to ReelChat 🎬</p>
+    </div>
+
+    <div class="actions">
+      <button class="action" onclick="like(this)">❤️</button>
+      <span class="count">0</span>
+
+      <button class="action" onclick="comment()">💬</button>
+      <span class="count">Comment</span>
+
+      <button class="action" onclick="share()">↗️</button>
+      <span class="count">Share</span>
+    </div>
+  </section>
+
+</div>
+
+<div class="bottom">
+  <button onclick="home()">🏠<br>Home</button>
+  <button onclick="alert('Search feature coming soon')">🔍<br>Search</button>
+  <button onclick="upload()">➕<br>Upload</button>
+  <button onclick="alert('Chat feature coming soon')">💬<br>Chat</button>
+  <button onclick="alert('Profile feature coming soon')">👤<br>Profile</button>
+</div>
+
+</div>
+
+<script>
+const reels = document.getElementById("reels");
+const fileInput = document.getElementById("file");
+
+function like(button){
+  const count = button.parentElement.querySelector(".count");
+  let n = Number(count.innerText) || 0;
+
+  if(button.dataset.liked !== "yes"){
+    n++;
+    button.dataset.liked = "yes";
+    button.style.background = "#e91e63";
+  }else{
+    n--;
+    button.dataset.liked = "no";
+    button.style.background = "#0008";
+  }
+
+  count.innerText = n;
+}
+
+function comment(){
+  const text = prompt("Apna comment likho:");
+  if(text){
+    alert("Comment add ho gaya: " + text);
+  }
+}
+
+async function share(){
+  const data = {
+    title:"ReelChat",
+    text:"Meri ReelChat reel dekho!"
+  };
+
+  if(navigator.share){
+    try{
+      await navigator.share(data);
+    }catch(e){}
+  }else{
+    alert("Share link copy karke WhatsApp par bhej sakte ho.");
+  }
+}
+
+function upload(){
+  fileInput.click();
+}
+
+fileInput.addEventListener("change", function(){
+  const file = this.files[0];
+  if(!file) return;
+
+  const url = URL.createObjectURL(file);
+
+  const section = document.createElement("section");
+  section.className = "reel";
+
+  section.innerHTML = `
+    <video src="${url}" loop muted playsinline autoplay></video>
+
+    <div class="info">
+      <h3>@you</h3>
+      <p>My new Reel 🎬</p>
+    </div>
+
+    <div class="actions">
+      <button class="action" onclick="like(this)">❤️</button>
+      <span class="count">0</span>
+
+      <button class="action" onclick="comment()">💬</button>
+      <span class="count">Comment</span>
+
+      <button class="action" onclick="share()">↗️</button>
+      <span class="count">Share</span>
+    </div>
+  `;
+
+  reels.prepend(section);
+  section.scrollIntoView({behavior:"smooth"});
+});
+
+function home(){
+  reels.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* Reel ko screen par aane par play karna */
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    const video = entry.target.querySelector("video");
+    if(!video) return;
+
+    if(entry.isIntersecting){
+      video.play().catch(()=>{});
+    }else{
+      video.pause();
+    }
+  });
+},{threshold:0.6});
+
+function watchReels(){
+  document.querySelectorAll(".reel").forEach(r=>observer.observe(r));
+}
+
+watchReels();
+</script>
+
+</body>
+</html>
